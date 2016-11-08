@@ -8,24 +8,24 @@ import com.alibaba.fastjson.annotation.JSONField;
 public class City {
 
     @JSONField(name = "id")
-    private String cid;
+    private String cityId;
     private String name;
     private String uid;
 
     public City(){}
 
-    public City(String cid, String name, String uid) {
-        this.cid = cid;
+    public City(String cityId, String name, String uid) {
+        this.cityId = cityId;
         this.name = name;
         this.uid = uid;
     }
 
-    public String getCid() {
-        return cid;
+    public String getCityId() {
+        return cityId;
     }
 
-    public void setCid(String cid) {
-        this.cid = cid;
+    public void setCityId(String cityId) {
+        this.cityId = cityId;
     }
 
     public String getName() {
@@ -47,7 +47,7 @@ public class City {
     @Override
     public String toString() {
         return "City{" +
-                "cid='" + cid + '\'' +
+                "cityId='" + cityId + '\'' +
                 ", name='" + name + '\'' +
                 ", uid='" + uid + '\'' +
                 '}';
