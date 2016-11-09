@@ -52,4 +52,20 @@ public class City {
                 ", uid='" + uid + '\'' +
                 '}';
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        City city = (City) o;
+
+        return cityId.equals(city.cityId);
+
+    }
+
+    @Override
+    public int hashCode() {
+        return cityId.hashCode();
+    }
 }

@@ -11,17 +11,19 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
 import org.apache.log4j.Logger;
+import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.util.StringUtils;
 import pojo.city.City;
+import pojo.city.CityTool;
 import util.DayType;
 import util.EventCatetory;
+import util.MongoUtil;
 import util.UriBuilder;
 
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.ListIterator;
+import java.util.*;
 
 /**
  * Created by zhaokai on 16-11-8.
@@ -29,7 +31,20 @@ import java.util.ListIterator;
 public class EventTool {
     private static Logger logger=Logger.getLogger(EventTool.class);
 
-    public static List<Event> getEventsFromHttp(String locId, DayType dayType, EventCatetory eventCatetory)
+    public static Set<Event> getAllEventsFromHttp() throws IOException, URISyntaxException {
+        Set<Event> allEvents=new HashSet<Event>();
+        List<City> allCities= CityTool.getAllCitiesFromDB();
+
+        for(City city:allCities){
+            for(DayType dayType:DayType.values()){
+                allEvents.addAll(getEventsFromHttp(city.getCityId(),dayType,EventCatetory.all));
+            }
+        }
+
+        return allEvents;
+    }
+
+    public static Set<Event> getEventsFromHttp(String locId, DayType dayType, EventCatetory eventCatetory)
             throws URISyntaxException, IOException {
         URIBuilder uriBuilder= UriBuilder.get();
         uriBuilder.setPath("/event/list")
@@ -47,41 +62,103 @@ public class EventTool {
 
         httpClient.close();
 
+        Set<Event> events=new HashSet<Event>();
+
         String eventsJsonStr= JSON.parseObject(eventsResult).getString("events");
-        JSONArray eventsJsonArray=JSON.parseArray(eventsJsonStr);
 
-        List<Event> events=new ArrayList<Event>();
+        if(!StringUtils.isEmpty(eventsJsonStr)) {
+            JSONArray eventsJsonArray = JSON.parseArray(eventsJsonStr);
 
-        ListIterator<Object> iterator=eventsJsonArray.listIterator();
-        while(iterator.hasNext()){
-            Object obj=iterator.next();
-            JSONObject jsonObject=JSON.parseObject(obj.toString());
+            ListIterator<Object> iterator = eventsJsonArray.listIterator();
+            while (iterator.hasNext()) {
+                Object obj = iterator.next();
+                JSONObject jsonObject = JSON.parseObject(obj.toString());
 
-            JSONObject ownerJsonObject=jsonObject.getJSONObject("owner");
-            jsonObject.put("ownerId",ownerJsonObject.get("id"));
+                JSONObject ownerJsonObject = jsonObject.getJSONObject("owner");
+                jsonObject.put("ownerId", ownerJsonObject.get("id"));
 
-            String geo=jsonObject.getString("geo");
-            String[] geos=geo.split(" ");
-            double latitude=Double.parseDouble(geos[0]);
-            double longitude=Double.parseDouble(geos[1]);
-            jsonObject.put("latitude",latitude);
-            jsonObject.put("longitude",longitude);
+                String geo = jsonObject.getString("geo");
+                String[] geos = geo.split(" ");
+                double latitude = Double.parseDouble(geos[0]);
+                double longitude = Double.parseDouble(geos[1]);
+                jsonObject.put("latitude", latitude);
+                jsonObject.put("longitude", longitude);
 
-            jsonObject.remove("image");
-            jsonObject.remove("adalt_url");
-            jsonObject.remove("owner");
-            jsonObject.remove("alt");
-            jsonObject.remove("geo");
-            jsonObject.remove("price_range");
-            jsonObject.remove("has_ticket");
-            jsonObject.remove("image_lmobile");
-            jsonObject.remove("image_hlarge");
+                String tags = jsonObject.getString("tags");
+                String[] tagsArray = tags.split(",");
+                List<String> tagsList = Arrays.asList(tagsArray);
+                jsonObject.put("tags", tagsList);
 
-            events.add(jsonObject.toJavaObject(Event.class));
+                String eventId = jsonObject.getString("id");
+                List<String> participantsList = getParticipantsOrWishersFromHttp(eventId, EventUserType.participants);
+                List<String> wishersList = getParticipantsOrWishersFromHttp(eventId, EventUserType.wishers);
+                jsonObject.put("participants", participantsList);
+                jsonObject.put("wishers", wishersList);
+
+                jsonObject.remove("image");
+                jsonObject.remove("adalt_url");
+                jsonObject.remove("owner");
+                jsonObject.remove("alt");
+                jsonObject.remove("geo");
+                jsonObject.remove("price_range");
+                jsonObject.remove("has_ticket");
+                jsonObject.remove("image_lmobile");
+                jsonObject.remove("image_hlarge");
+
+                events.add(jsonObject.toJavaObject(Event.class));
+            }
         }
 
         logger.info("获取"+events.size()+"个活动。");
 
         return events;
     }
+
+    public static List<String> getParticipantsOrWishersFromHttp(String eventId,EventUserType eventUserType)
+            throws URISyntaxException, IOException {
+        URIBuilder uriBuilder= UriBuilder.get();
+        uriBuilder.setPath("/event/"+eventId+"/"+eventUserType.toString());
+
+        URI uri=uriBuilder.build();
+
+        HttpGet httpGet=new HttpGet(uri);
+
+        CloseableHttpClient httpClient= HttpClients.createDefault();
+        CloseableHttpResponse httpResponse=httpClient.execute(httpGet);
+        HttpEntity httpEntity=httpResponse.getEntity();
+        String participantsResult= EntityUtils.toString(httpEntity);
+
+        httpClient.close();
+
+        List<String> users = new ArrayList<String>();
+        String usersJsonStr= JSON.parseObject(participantsResult).getString("users");
+
+        if(!StringUtils.isEmpty(usersJsonStr)) {
+            JSONArray usersJsonArray = JSON.parseArray(usersJsonStr);
+
+            ListIterator<Object> iterator = usersJsonArray.listIterator();
+            while (iterator.hasNext()) {
+                Object obj = iterator.next();
+                JSONObject jsonObject = JSON.parseObject(obj.toString());
+
+                String participantId = jsonObject.getString("id");
+                users.add(participantId);
+            }
+        }
+
+        return users;
+    }
+
+    public static void storeEvents(Set<Event> events){
+        MongoTemplate mongoTemplate= MongoUtil.getMongoTemplate();
+        for(Event event:events){
+            mongoTemplate.insert(event);
+            logger.info("Insert:"+event);
+        }
+    }
+
+}
+
+enum EventUserType{
+    participants,wishers
 }
