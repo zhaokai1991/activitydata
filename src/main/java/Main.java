@@ -19,7 +19,6 @@ import java.util.List;
 public class Main {
 
     public static void main(String[] args) throws IOException, URISyntaxException {
-        EventTool.storeEvents(EventTool.getEventsFromHttp("108288", DayType.week, EventCatetory.all));
     }
 
 }

@@ -13,7 +13,7 @@ import java.util.Set;
  */
 public class ActivityDataDriver {
 
-    public void run() throws IOException, URISyntaxException {
+    public static void run() throws IOException, URISyntaxException {
         //先获取并存储城市信息
         List<City> cities= CityTool.getCitiesFromHttp();
         CityTool.storeCities(cities);

@@ -3,27 +3,22 @@ package pojo.event;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import org.apache.http.HttpEntity;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.utils.URIBuilder;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClients;
-import org.apache.http.util.EntityUtils;
 import org.apache.log4j.Logger;
 import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.util.StringUtils;
 import pojo.city.City;
 import pojo.city.CityTool;
-import util.DayType;
-import util.EventCatetory;
-import util.MongoUtil;
-import util.UriBuilder;
+import util.*;
 
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.*;
+
+import static org.springframework.data.mongodb.core.query.Criteria.where;
+import static org.springframework.data.mongodb.core.query.Query.query;
 
 /**
  * Created by zhaokai on 16-11-8.
@@ -53,14 +48,9 @@ public class EventTool {
                 .addParameter("type",eventCatetory.toString());
         URI uri=uriBuilder.build();
 
-        HttpGet httpGet=new HttpGet(uri);
+        logger.info("获取活动："+uri.toString());
 
-        CloseableHttpClient httpClient= HttpClients.createDefault();
-        CloseableHttpResponse httpResponse=httpClient.execute(httpGet);
-        HttpEntity httpEntity=httpResponse.getEntity();
-        String eventsResult= EntityUtils.toString(httpEntity);
-
-        httpClient.close();
+        String eventsResult= HttpUtil.getEntityString(uri);
 
         Set<Event> events=new HashSet<Event>();
 
@@ -121,14 +111,7 @@ public class EventTool {
 
         URI uri=uriBuilder.build();
 
-        HttpGet httpGet=new HttpGet(uri);
-
-        CloseableHttpClient httpClient= HttpClients.createDefault();
-        CloseableHttpResponse httpResponse=httpClient.execute(httpGet);
-        HttpEntity httpEntity=httpResponse.getEntity();
-        String participantsResult= EntityUtils.toString(httpEntity);
-
-        httpClient.close();
+        String participantsResult= HttpUtil.getEntityString(uri);
 
         List<String> users = new ArrayList<String>();
         String usersJsonStr= JSON.parseObject(participantsResult).getString("users");
@@ -152,8 +135,10 @@ public class EventTool {
     public static void storeEvents(Set<Event> events){
         MongoTemplate mongoTemplate= MongoUtil.getMongoTemplate();
         for(Event event:events){
-            mongoTemplate.insert(event);
-            logger.info("Insert:"+event);
+            if(!mongoTemplate.exists(query(where("eventId").is(event.getEventId())),Event.class)) {
+                mongoTemplate.insert(event);
+                logger.info("Insert:" + event);
+            }
         }
     }
 

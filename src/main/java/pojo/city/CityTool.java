@@ -1,15 +1,10 @@
 package pojo.city;
 
 import com.alibaba.fastjson.JSON;
-import org.apache.http.HttpEntity;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.utils.URIBuilder;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClients;
-import org.apache.http.util.EntityUtils;
 import org.apache.log4j.Logger;
 import org.springframework.data.mongodb.core.MongoTemplate;
+import util.HttpUtil;
 import util.MongoUtil;
 import util.UriBuilder;
 
@@ -19,7 +14,6 @@ import java.net.URISyntaxException;
 import java.util.List;
 
 import static org.springframework.data.mongodb.core.query.Criteria.where;
-import static org.springframework.data.mongodb.core.query.Update.update;
 import static org.springframework.data.mongodb.core.query.Query.query;
 
 /**
@@ -34,14 +28,7 @@ public class CityTool {
         uriBuilder.setPath("/loc/list");
         URI uri=uriBuilder.build();
 
-        HttpGet httpGet=new HttpGet(uri);
-
-        CloseableHttpClient httpClient= HttpClients.createDefault();
-        CloseableHttpResponse httpResponse=httpClient.execute(httpGet);
-        HttpEntity httpEntity=httpResponse.getEntity();
-        String citiesResult= EntityUtils.toString(httpEntity);
-
-        httpClient.close();
+        String citiesResult= HttpUtil.getEntityString(uri);
 
         String citiesJsonStr= JSON.parseObject(citiesResult).getString("locs");
 
