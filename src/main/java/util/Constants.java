@@ -9,4 +9,6 @@ public class Constants {
 
     public static final String SERIALIZATION_DIR="/home/zhaokai/meetup/";
 
+    public static final int SECOND=1000;
+
 }

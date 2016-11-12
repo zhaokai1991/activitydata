@@ -1,4 +1,4 @@
-package pojo.city;
+package douban;
 
 import com.alibaba.fastjson.annotation.JSONField;
 

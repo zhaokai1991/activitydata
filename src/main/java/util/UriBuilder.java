@@ -8,9 +8,14 @@ import org.apache.http.client.utils.URIBuilder;
 public class UriBuilder {
 
     public static URIBuilder get(){
+//        return new URIBuilder()
+//                .setScheme("https")
+//                .setHost("api.douban.com/v2");
+
         return new URIBuilder()
                 .setScheme("https")
-                .setHost("api.douban.com/v2");
+                .setHost("api.meetup.com")
+                .addParameter("key",Constants.API_KEY);
     }
 
 }

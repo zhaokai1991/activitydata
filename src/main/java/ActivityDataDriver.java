@@ -1,7 +1,13 @@
-import pojo.city.City;
-import pojo.city.CityTool;
-import pojo.event.Event;
-import pojo.event.EventTool;
+import douban.City;
+import douban.CityTool;
+import douban.Event;
+import douban.EventTool;
+import meetup.topicCategory.TopicCategory;
+import meetup.topicCategory.TopicCategoryTool;
+import org.springframework.data.mongodb.core.MongoTemplate;
+import meetup.category.Category;
+import meetup.category.CategoryTool;
+import util.MongoUtil;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -13,14 +19,21 @@ import java.util.Set;
  */
 public class ActivityDataDriver {
 
-    public static void run() throws IOException, URISyntaxException {
-        //先获取并存储城市信息
-        List<City> cities= CityTool.getCitiesFromHttp();
-        CityTool.storeCities(cities);
+    public static void run() throws IOException, URISyntaxException, InterruptedException {
 
-        //获取所有活动信息并存储
-        Set<Event> events= EventTool.getAllEventsFromHttp();
-        EventTool.storeEvents(events);
+        MongoTemplate mongoTemplate= MongoUtil.getMongoTemplate();
+
+        //先获取category
+        if(!mongoTemplate.collectionExists(Category.class)){
+            List<Category> categories= CategoryTool.getAllCategoriesFromHttp();
+            CategoryTool.storeCategories(categories,mongoTemplate);
+        }
+
+        //获取topic_category
+        if(!mongoTemplate.collectionExists(TopicCategory.class)){
+            List<TopicCategory> topicCategories= TopicCategoryTool.getAllTopicCategoriesFromHttp();
+            TopicCategoryTool.storeTopicCategories(topicCategories,mongoTemplate);
+        }
     }
 
 }

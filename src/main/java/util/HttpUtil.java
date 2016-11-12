@@ -22,9 +22,13 @@ public class HttpUtil {
         CloseableHttpResponse httpResponse=httpClient.execute(httpGet);
         HttpEntity httpEntity=httpResponse.getEntity();
 
+        String result=EntityUtils.toString(httpEntity);
+
+        System.out.println("HttpUtil:"+result);
+
         httpClient.close();
 
-        return EntityUtils.toString(httpEntity);
+        return result;
     }
 
 }

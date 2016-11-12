@@ -1,4 +1,4 @@
-package pojo.event;
+package douban;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
@@ -6,10 +6,7 @@ import com.alibaba.fastjson.JSONObject;
 import org.apache.http.client.utils.URIBuilder;
 import org.apache.log4j.Logger;
 import org.springframework.data.mongodb.core.MongoTemplate;
-import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.util.StringUtils;
-import pojo.city.City;
-import pojo.city.CityTool;
 import util.*;
 
 import java.io.IOException;
@@ -26,13 +23,14 @@ import static org.springframework.data.mongodb.core.query.Query.query;
 public class EventTool {
     private static Logger logger=Logger.getLogger(EventTool.class);
 
-    public static Set<Event> getAllEventsFromHttp() throws IOException, URISyntaxException {
+    public static Set<Event> getAllEventsFromHttp() throws IOException, URISyntaxException, InterruptedException {
         Set<Event> allEvents=new HashSet<Event>();
         List<City> allCities= CityTool.getAllCitiesFromDB();
 
         for(City city:allCities){
             for(DayType dayType:DayType.values()){
                 allEvents.addAll(getEventsFromHttp(city.getCityId(),dayType,EventCatetory.all));
+                Thread.sleep(5*1000);
             }
         }
 

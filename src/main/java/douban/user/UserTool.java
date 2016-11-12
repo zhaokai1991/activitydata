@@ -1,4 +1,4 @@
-package pojo.user;
+package douban.user;
 
 import com.alibaba.fastjson.JSON;
 import org.apache.http.client.utils.URIBuilder;

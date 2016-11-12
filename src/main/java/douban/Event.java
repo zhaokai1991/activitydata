@@ -1,4 +1,4 @@
-package pojo.event;
+package douban;
 
 import com.alibaba.fastjson.annotation.JSONField;
 
