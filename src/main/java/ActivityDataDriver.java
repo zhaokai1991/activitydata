@@ -2,6 +2,9 @@ import douban.City;
 import douban.CityTool;
 import douban.Event;
 import douban.EventTool;
+import meetup.group.Group;
+import meetup.group.GroupTool;
+import meetup.topic.TopicTool;
 import meetup.topicCategory.TopicCategory;
 import meetup.topicCategory.TopicCategoryTool;
 import org.springframework.data.mongodb.core.MongoTemplate;
@@ -34,6 +37,13 @@ public class ActivityDataDriver {
             List<TopicCategory> topicCategories= TopicCategoryTool.getAllTopicCategoriesFromHttp();
             TopicCategoryTool.storeTopicCategories(topicCategories,mongoTemplate);
         }
+
+        //获取group
+        List<Group> groups=GroupTool.getAllGroupsInNewYorkFromHttp();
+        GroupTool.storeGroups(groups,mongoTemplate);
+
+        //从group中获取所有topic
+        TopicTool.getAndStoreAllTopicsInNewYork(mongoTemplate);
     }
 
 }
