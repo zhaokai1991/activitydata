@@ -1,7 +1,4 @@
-import douban.City;
-import douban.CityTool;
-import douban.Event;
-import douban.EventTool;
+import meetup.event.EventTool;
 import meetup.group.Group;
 import meetup.group.GroupTool;
 import meetup.topic.TopicTool;
@@ -44,6 +41,9 @@ public class ActivityDataDriver {
 
         //从group中获取所有topic
         TopicTool.getAndStoreAllTopicsInNewYork(mongoTemplate);
+
+        //获取所有group举办的过去的和将来的活动
+        EventTool.getAndStoreEventsInNewYork(mongoTemplate);
     }
 
 }

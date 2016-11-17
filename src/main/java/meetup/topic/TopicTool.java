@@ -16,10 +16,9 @@ public class TopicTool {
 
     private static Logger logger=Logger.getLogger(TopicTool.class);
 
-    public static List<Topic> getTopicsFromAnExistedGroup(String groupId, MongoTemplate mongoTemplate){
-        Group group=mongoTemplate.findOne(query(where("groupId").is(groupId)),Group.class);
+    public static List<Topic> getTopicsFromAnExistedGroup(Group group){
         List<Topic> topicList=group.getTopics();
-        logger.info("从"+groupId+" group获取"+topicList.size()+"个topic:"+topicList);
+        logger.info("从"+group.getGroupId()+" group获取"+topicList.size()+"个topic:"+topicList);
         return group.getTopics();
     }
 
@@ -35,8 +34,7 @@ public class TopicTool {
     public static void getAndStoreAllTopicsInNewYork(MongoTemplate mongoTemplate){
         List<Group> groupList=mongoTemplate.findAll(Group.class);
         for(Group group:groupList){
-            storeTopics(getTopicsFromAnExistedGroup(
-                    group.getGroupId(),mongoTemplate),mongoTemplate);
+            storeTopics(group.getTopics(),mongoTemplate);
         }
     }
 

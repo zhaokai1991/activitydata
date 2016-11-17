@@ -16,8 +16,6 @@ public class Group {
     @JSONField(name = "created")
     private long creationTime;
 
-    private String description;
-
     @JSONField(name = "id")
     private String groupId;
 
@@ -49,14 +47,6 @@ public class Group {
 
     public void setCreationTime(long creationTime) {
         this.creationTime = creationTime;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
     }
 
     public String getGroupId() {

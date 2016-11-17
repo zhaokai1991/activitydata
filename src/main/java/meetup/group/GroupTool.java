@@ -46,10 +46,9 @@ public class GroupTool {
 
     public static void storeGroups(List<Group> groups, MongoTemplate mongoTemplate){
         for(Group group:groups){
-            if(!mongoTemplate.exists(query(where("groupId").is(group.getGroupId())),Group.class)) {
-                mongoTemplate.insert(group);
-                logger.info("插入group:" + group);
-            }
+            mongoTemplate.findAndRemove(query(where("groupId").is(group.getGroupId())),Group.class);
+            mongoTemplate.insert(group);
+            logger.info("插入group:" + group);
         }
     }
 
