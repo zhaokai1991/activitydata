@@ -6,6 +6,7 @@ import org.apache.log4j.Logger;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import util.Constants;
 import util.HttpUtil;
+import util.PojoID;
 import util.UriBuilder;
 
 import java.io.IOException;
@@ -46,7 +47,7 @@ public class GroupTool {
 
     public static void storeGroups(List<Group> groups, MongoTemplate mongoTemplate){
         for(Group group:groups){
-            mongoTemplate.findAndRemove(query(where("groupId").is(group.getGroupId())),Group.class);
+            mongoTemplate.remove(query(where(PojoID.GROUP_ID).is(group.getGroupId())),Group.class);
             mongoTemplate.insert(group);
             logger.info("插入group:" + group);
         }

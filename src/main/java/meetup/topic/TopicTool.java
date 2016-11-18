@@ -3,6 +3,7 @@ package meetup.topic;
 import meetup.group.Group;
 import org.apache.log4j.Logger;
 import org.springframework.data.mongodb.core.MongoTemplate;
+import util.PojoID;
 
 import static org.springframework.data.mongodb.core.query.Criteria.where;
 import static org.springframework.data.mongodb.core.query.Query.query;
@@ -24,7 +25,7 @@ public class TopicTool {
 
     public static void storeTopics(List<Topic> topics,MongoTemplate mongoTemplate){
         for(Topic topic:topics){
-            if(!mongoTemplate.exists(query(where("topicId").is(topic.getTopicId())),Topic.class)){
+            if(!mongoTemplate.exists(query(where(PojoID.TOPIC_ID).is(topic.getTopicId())),Topic.class)){
                 mongoTemplate.insert(topic);
                 logger.info("插入topic:"+topic);
             }

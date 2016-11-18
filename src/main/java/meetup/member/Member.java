@@ -1,6 +1,7 @@
 package meetup.member;
 
 import com.alibaba.fastjson.annotation.JSONField;
+import meetup.group.Group;
 import meetup.topic.Topic;
 
 import java.util.List;
@@ -22,6 +23,16 @@ public class Member {
     private List<Topic> topics;
 
     private List<Member> friends;
+
+    private List<String> groups;
+
+    public List<String> getGroups() {
+        return groups;
+    }
+
+    public void setGroups(List<String> groups) {
+        this.groups = groups;
+    }
 
     public String getMemberId() {
         return memberId;

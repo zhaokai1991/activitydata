@@ -5,9 +5,7 @@ import meetup.group.Group;
 import org.apache.http.client.utils.URIBuilder;
 import org.apache.log4j.Logger;
 import org.springframework.data.mongodb.core.MongoTemplate;
-import util.EventStatus;
-import util.HttpUtil;
-import util.UriBuilder;
+import util.*;
 
 import java.io.IOException;
 import java.net.URI;
@@ -24,6 +22,8 @@ public class EventTool {
 
     private static Logger logger=Logger.getLogger(EventTool.class);
 
+
+    //获取某个特定group在特定时间段组织的活动
     public static List<Event> getEventsHostedByAGroup(Group group, EventStatus eventStatus) throws URISyntaxException, IOException {
         URIBuilder uriBuilder= UriBuilder.get();
         uriBuilder.setPath("/"+group.getUrlname()+"/events")
@@ -40,6 +40,7 @@ public class EventTool {
         return events;
     }
 
+    //获取某个特定group的过去和未来的所有活动
     public static List<Event> getPastAndUpcomingEventsHostedByAGroup(Group group) throws IOException, URISyntaxException {
         List<Event> pastEvents=getEventsHostedByAGroup(group,EventStatus.PAST);
         List<Event> upcomingEvents=getEventsHostedByAGroup(group,EventStatus.UPCOMING);
@@ -51,16 +52,23 @@ public class EventTool {
 
     public static void storeEvents(List<Event> events, MongoTemplate mongoTemplate){
         for(Event event:events){
-            mongoTemplate.findAndRemove(query(where("eventId").is(event.getEventId())),Event.class);
+            mongoTemplate.remove(query(where(PojoID.EVENT_ID).is(event.getEventId())),Event.class);
             mongoTemplate.insert(event);
             logger.info("插入event:"+event);
         }
     }
 
+    //获取纽约所有group组织的活动
     public static void getAndStoreEventsInNewYork(MongoTemplate mongoTemplate) throws IOException, URISyntaxException {
         List<Group> groupList=mongoTemplate.findAll(Group.class);
         for(Group group:groupList){
             storeEvents(getPastAndUpcomingEventsHostedByAGroup(group),mongoTemplate);
+
+            try {
+                Thread.sleep(5* Constants.SECOND);
+            } catch (InterruptedException e) {
+                continue;
+            }
         }
     }
 
