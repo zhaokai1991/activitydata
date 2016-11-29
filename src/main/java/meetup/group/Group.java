@@ -4,12 +4,15 @@ import com.alibaba.fastjson.annotation.JSONField;
 import meetup.category.Category;
 import meetup.member.Member;
 import meetup.topic.Topic;
+import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.util.List;
 
 /**
  * Created by zhaokai on 16-11-15.
  */
+
+@Document(collection = "egroup")
 public class Group {
 
     private Category category;

@@ -55,31 +55,31 @@ public class MemberTool {
     public static void getAndStoreMembersInNewYork(MongoTemplate mongoTemplate) throws IOException, URISyntaxException {
         List<Group> groupList=mongoTemplate.findAll(Group.class);
         for(Group group:groupList){
-            List<Member> members=getMembersOfAGroupFromHttp(group);
+            try {
+                List<Member> members = getMembersOfAGroupFromHttp(group);
 
-            if(members.isEmpty()){//该group为私密或者没有成员，则删除之
-                mongoTemplate.remove(query(where(PojoID.GROUP_ID).is(group.getGroupId())),Group.class);
-            }else{//该group有成员
-                for(Member member:members){
-                    //为数据库中group添加该member
-                    mongoTemplate.updateFirst(query(where(PojoID.GROUP_ID).is(group.getGroupId())),
-                            new Update().push("members",member.getMemberId()),Group.class);
+                if (members.isEmpty()) {//该group为私密或者没有成员，则删除之
+                    mongoTemplate.remove(query(where(PojoID.GROUP_ID).is(group.getGroupId())), Group.class);
+                } else {//该group有成员
+                    for (Member member : members) {
+                        //为数据库中group添加该member
+                        mongoTemplate.updateFirst(query(where(PojoID.GROUP_ID).is(group.getGroupId())),
+                                new Update().push("members", member.getMemberId()), Group.class);
 
-                    //为数据库中的member添加group
-                    if(mongoTemplate.exists(query(where(PojoID.MEMBER_ID).
-                            is(member.getMemberId())),Member.class)){
-                        mongoTemplate.updateFirst(query(where(PojoID.MEMBER_ID).
-                                is(member.getMemberId())),new Update().push("groups",group),Member.class);
-                    }else{
-                        member.setGroups(Arrays.asList(group.getGroupId()));
-                        mongoTemplate.insert(member);
+                        //为数据库中的member添加group
+                        if (mongoTemplate.exists(query(where(PojoID.MEMBER_ID).
+                                is(member.getMemberId())), Member.class)) {
+                            mongoTemplate.updateFirst(query(where(PojoID.MEMBER_ID).
+                                    is(member.getMemberId())), new Update().push("groups", group), Member.class);
+                        } else {
+                            member.setGroups(Arrays.asList(group.getGroupId()));
+                            mongoTemplate.insert(member);
+                        }
                     }
                 }
-            }
-
-            try {
-                Thread.sleep(5* Constants.SECOND);
-            } catch (InterruptedException e) {
+                Thread.sleep(5 * Constants.SECOND);
+            }catch (Exception e){
+                e.printStackTrace();
                 continue;
             }
 

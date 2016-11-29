@@ -62,11 +62,15 @@ public class EventTool {
     public static void getAndStoreEventsInNewYork(MongoTemplate mongoTemplate) throws IOException, URISyntaxException {
         List<Group> groupList=mongoTemplate.findAll(Group.class);
         for(Group group:groupList){
-            storeEvents(getPastAndUpcomingEventsHostedByAGroup(group),mongoTemplate);
-
+            if(mongoTemplate.exists(query(where("group").is(group)),Event.class)) {
+                logger.info("跳过group::"+group.getName());
+                continue;
+            }
             try {
+                storeEvents(getPastAndUpcomingEventsHostedByAGroup(group),mongoTemplate);
                 Thread.sleep(5* Constants.SECOND);
-            } catch (InterruptedException e) {
+            } catch (Exception e) {
+                e.printStackTrace();
                 continue;
             }
         }

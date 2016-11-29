@@ -1,6 +1,7 @@
 import meetup.event.EventTool;
 import meetup.group.Group;
 import meetup.group.GroupTool;
+import meetup.member.MemberTool;
 import meetup.topic.TopicTool;
 import meetup.topicCategory.TopicCategory;
 import meetup.topicCategory.TopicCategoryTool;
@@ -22,7 +23,7 @@ public class ActivityDataDriver {
     public static void run() throws IOException, URISyntaxException, InterruptedException {
 
         MongoTemplate mongoTemplate= MongoUtil.getMongoTemplate();
-
+/*
         //先获取category
         if(!mongoTemplate.collectionExists(Category.class)){
             List<Category> categories= CategoryTool.getAllCategoriesFromHttp();
@@ -41,9 +42,12 @@ public class ActivityDataDriver {
 
         //从group中获取所有topic
         TopicTool.getAndStoreAllTopicsInNewYork(mongoTemplate);
-
+*/
         //获取所有group举办的过去的和将来的活动
         EventTool.getAndStoreEventsInNewYork(mongoTemplate);
+
+        //获取所有member信息
+        MemberTool.getAndStoreMembersInNewYork(mongoTemplate);
     }
 
 }
